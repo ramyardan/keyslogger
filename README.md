@@ -1,4 +1,6 @@
-# Keyslogger - Keylogging Proof of Concept for Security Research
+# Keyslogger - Keylogging Proof of Concept for Security Research 
+
+**Developed By Ramyar Daneshgar**
 
 Keyslogger is a proof of concept developed to demonstrate secure keylogging techniques using Python. This project highlights skills in encryption, GUI development, and real-time data processing. The tool logs keystrokes and stores them in an encrypted format, providing a controlled way to explore keylogging as a security research tool.
 
