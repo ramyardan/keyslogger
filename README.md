@@ -42,6 +42,4 @@ Keyslogger is a Python-based proof of concept designed to demonstrate secure key
 - **Educational and Security Research Focus**: Developed strictly as a learning tool for ethical security research.
 - **Strict Adherence to Legal Guidelines**: Unauthorized keylogging is illegal; this tool was designed to showcase ethical programming in controlled environments only.
 
----
 
-This README emphasizes your technical skills in encryption, secure data handling, and ethical programming, positioning you as a security-conscious developer. It’s designed to be concise and impactful, appealing directly to recruiters seeking expertise in secure software practices.
