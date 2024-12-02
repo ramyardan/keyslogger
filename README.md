@@ -39,7 +39,6 @@ Keyslogger is a Python-based proof of concept that demonstrates secure keyloggin
 
 
 
-https://github.com/user-attachments/assets/b0af8a0e-ffab-4582-977c-39516c82e40e
 
 
 
